@@ -1,2 +1,1 @@
-# USCProjects
-Projects in my USC curiculum
+Socket programming project for EE 450
