@@ -1,0 +1,118 @@
+a) Name : Shruti Zamwar
+b) ID : 6449809010
+------------------------------------------------------------------------------------------------
+c) Description : This project involves distribution of key value pairs in 3 servers.
+   The key value pairs are in 3 text files for 3 different server. Similarly clients 
+   will have some search keywords and their corresponding values in text files. 
+   We need to read these files as well and store this also in some data structure.
+   In my project I have stored all these key value pairs in simple maps of <string,string>.
+
+   One of the servers is the designated server which is supposed to satisfy the 
+   client requests. Basically clients will contact the designated server only 
+   and no other server. If the designated server say server 1 can satisfy the 
+   client request on its own, it will do so. But if suppose server 1 cannot 
+   satisfy the client request, it will contact the next server say server2. 
+
+   Server 2 will check in its structure if it can satisfy the request on its own. 
+   If server 2 can find the requested key in its structure it will send the 
+   corresponding value to server 1 which in turn will send the reply to appropriate client. 
+   Here server 1 will update its mapping with the new requested key 
+   and the value it received from server2.
+
+   If server 2 cannot satisfy the request on its own it will request server 3 for the value. 
+   Server 3 will check its structure and send the reply to server 2 and server 2 will send it 
+   back to server 1 which replies to the client. Here the server 1 and server 2 both will 
+   update their structures  with the copy of this new requested key and value.
+
+   Basically this updating of structures will help when another client requests the same key, 
+   then server 1 can itself satisfy the client's request and it doesn't have to ask server 2.
+
+---------------------------------------------------------------------------------------------------
+
+d) Files and their descriptions : 	
+   client1.cpp : It reads the client1.txt file and stores the key value pairs in a map. 
+   It accepts a search term from the user and resolves it to a key by searching it in the map.
+   Then it opens a bidirectional UDP socket and sends a request to server 1 to get the value 
+   for this key. When it receives the value it closes its UDP connection with server 1.
+   
+   client2.cpp : It reads the client2.txt file and stores the key value pairs in a map. 
+   It accepts a search term from the user and resolves it to a key by searching it in the map.
+   Then it opens a UDP socket and sends a request to server 1 to get the value for this key.
+   When it receives the value it closes its UDP connection with server 1.
+   
+   dhtserver1.cpp : It reads the key value pairs from server1.txt and stores them in a map.
+   It opens a UDP connection and keeps listening to get a request from the client. 
+   Upon receiving the request from a client, check the keys in its structures. If it finds the key,
+   it retrieves the value and replies to client immediately. If it doesn't find the key it opens a 
+   TCP connection to request server 2 for the value for that requested key. It waits for the reply 
+   from server 2. Once it receives the reply from server 2, it closes the TCP connection with server 2 
+   and forwards the reply to the requesting client. It will also add this new key and its value 
+   received from server 2 to its map.
+   
+   dhtserver2.cpp : It reads the key value pairs from server2.txt and stores them in a map.
+   It opens a TCP connection and acts as a server for server 1. It keeps listening for 
+   request from server 1. When it receives a request from server 1, it checks its key value map. 
+   If it gets the key in its map, it replies the server 1 with the corresponding value immediately. 
+   If it cannot find the requested key in its map, it opens a TCP connection to request server 3 
+   for the value for that requested key. It waits for the reply from server 3. 
+   Once it receives the reply from server 3, it closes the TCP connection with server 3 
+   and forwards the reply to the server 1. It will also add this new key and its value 
+   received from server 3 to its map.
+   
+   dhtserver3.cpp : It reads the key value pairs from server3.txt and stores them in a map.
+   It opens a TCP connection and acts as a server for server 2. It keeps listening for 
+   request from server 2. When it receives a request from server 2, it checks its key value map. 
+   It replies the server 1 with the corresponding value immediately.
+   
+   utilities.cpp : This file has two common functions which are used by all client and server files. 
+   One function getMap(String fileName) reads the requested file line by line and stores the key value 
+   of the file in a map and returns the map. It also has a function getWords(String str) which 
+   takes a string and returns an array of words separated by white space.
+   
+   utilities.h : This is the header file for utilities.cpp which 
+   has the declarations of the function describes in utilities.cpp
+   
+   makefile : The make file compiles the following files: 
+   --> dhtserver1.cpp, dhtserver2.cpp, dhtserver3.cpp, client1.cpp and client2.cpp 
+   and its dependencies i.e utilities.cpp and utilities.h. 
+   Thus it creates the output files server1, server2, server3, client1 and client2
+   by running the command "make all"(without quotes). 
+   It can also cleans all the output files by running the command "make clean" (without quotes).
+   
+-----------------------------------------------------------------------------------------------------------
+
+e) Steps to run the program :
+   
+   Step1 : Run the make file by giving the command "make all" (without quotes).
+   This will create the output files for all the 3 server namely server1, server2, server3 
+   and 2 clients namely client1, client2.
+   
+   Step2: Open a different terminal for each client and server and 
+   run the command ./server# to run server and ./client# to run client. 
+   (replace# with the respective server no. and client number)
+   
+-------------------------------------------------------------------------------------------------------------
+
+f) Format of messages exchanged : No other format is used.
+
+-------------------------------------------------------------------------------------------------------------
+
+h) Reused code: I used the code from following link
+   https://www.cs.rutgers.edu/~pxk/417/notes/sockets/index.html
+   
+   In TCP server used the following code snippet and functions
+   
+   / * allow immediate reuse of the port */
+   setsockopt(svc, SOL_SOCKET, SO_REUSEADDR, &sockoptval, sizeof(int));
+	
+    /* loop, accepting connection requests */
+	while ((rqst = accept(svc, (struct sockaddr *)&client_addr, &alen)) < 0) {
+	we may break out of accept if the system call */
+		/* was interrupted. In this case, loop back and */
+		/* try again */
+		if ((errno != ECHILD) && (errno != ERESTART) && (errno != EINTR)) {
+				perror("accept failed");
+				exit(1);
+		} 
+	}
+---------------------------------------------------------------------------------------------------------------
