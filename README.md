@@ -1,2 +1,2 @@
 # USCProjects
-Projects in mu USC curiculum
+Projects in my USC curiculum
